@@ -10,10 +10,11 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class EmployeeResource extends Resource
+class EmployeeResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Employee::class;
 
@@ -23,9 +24,25 @@ class EmployeeResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('subkon_id')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Select::make('subkon_id')
+                ->label('Subkon')
+                ->relationship('subkon', 'name')  // Refers to the 'subkon' relationship in Employee model
+                ->required()
+                ->preload()
+                ->searchable()
+                ->getSearchResultsUsing(fn (string $query) => 
+                    \App\Models\Subkon::where('name', 'like', "%{$query}%")
+                        ->orWhere('kode_subkon', 'like', "%{$query}%")
+                        ->get()
+                        ->mapWithKeys(fn ($subkon) => [
+                            $subkon->id => "{$subkon->kode_subkon} - {$subkon->name}"
+                        ])
+                )
+                ->getOptionLabelUsing(fn ($value) => 
+                    optional(\App\Models\Subkon::find($value))->kode_subkon
+                        . ' - ' 
+                        . optional(\App\Models\Subkon::find($value))->name
+                ),
                 Forms\Components\TextInput::make('nik')
                     ->required()
                     ->maxLength(255),
@@ -45,7 +62,7 @@ class EmployeeResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('attachment_ktp')
-                    ->required()
+                    // ->required()
                     ->maxLength(255),
             ]);
     }
@@ -111,6 +128,18 @@ class EmployeeResource extends Resource
             'index' => Pages\ListEmployees::route('/'),
             'create' => Pages\CreateEmployee::route('/create'),
             'edit' => Pages\EditEmployee::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any'
         ];
     }
 }

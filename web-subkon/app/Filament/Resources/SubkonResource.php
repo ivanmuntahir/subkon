@@ -10,10 +10,11 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class SubkonResource extends Resource
+class SubkonResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Subkon::class;
 
@@ -114,5 +115,17 @@ class SubkonResource extends Resource
 
         // Return the new kode_subkon, e.g., 'SUB-006'
         return "SUB-{$newNumber}";
+    }
+
+     public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any'
+        ];
     }
 }
