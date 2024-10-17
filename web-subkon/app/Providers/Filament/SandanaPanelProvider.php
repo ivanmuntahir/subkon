@@ -29,7 +29,7 @@ class SandanaPanelProvider extends PanelProvider
             ->path('sandana')
             ->login(Login::class)
             ->colors([
-                'primary' => Color::Emerald,
+                'primary' => Color::Cyan,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -56,7 +56,7 @@ class SandanaPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->plugins([
-            \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
             ]);
     }
 }

@@ -63,7 +63,7 @@ class SubkonPolicy
      */
     public function forceDelete(User $user, Subkon $subkon): bool
     {
-        return $user->can('force_delete_subkon');
+        return $user->can('{{ ForceDelete }}');
     }
 
     /**
@@ -71,7 +71,7 @@ class SubkonPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_subkon');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**
@@ -79,7 +79,7 @@ class SubkonPolicy
      */
     public function restore(User $user, Subkon $subkon): bool
     {
-        return $user->can('restore_subkon');
+        return $user->can('{{ Restore }}');
     }
 
     /**
@@ -87,7 +87,7 @@ class SubkonPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_subkon');
+        return $user->can('{{ RestoreAny }}');
     }
 
     /**
@@ -95,7 +95,7 @@ class SubkonPolicy
      */
     public function replicate(User $user, Subkon $subkon): bool
     {
-        return $user->can('replicate_subkon');
+        return $user->can('{{ Replicate }}');
     }
 
     /**
@@ -103,6 +103,6 @@ class SubkonPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_subkon');
+        return $user->can('{{ Reorder }}');
     }
 }
