@@ -8,7 +8,8 @@ How to Setup Properly
 8. run composer install in terminal to install composer in clone project
 9. run php artisan migrate to run database migrate if any
 10. run composer require filament/filament:"^3.2" -W to install filament
-11. run php artisan shield:install to install filament-shield policies
-12. run php artisan key:generate to generate key for your app local
-13. run php artisan serve to open in localhost
-14. run php artisan make:policy YourModelName --model=YourModelName to add filament policy access
+11. run php artisan vendor:publish --tag=filament-shield-config to config vendor 
+12. run php artisan shield:install to install filament-shield policies
+13. run php artisan key:generate to generate key for your app local
+14. run php artisan serve to open in localhost
+15. run php artisan make:policy YourModelName --model=YourModelName to add filament policy access
