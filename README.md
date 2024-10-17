@@ -11,3 +11,4 @@ How to Setup Properly
 11. run php artisan shield:install to install filament-shield policies
 12. run php artisan key:generate to generate key for your app local
 13. run php artisan serve to open in localhost
+14. run php artisan make:policy YourModelName --model=YourModelName to add filament policy access
