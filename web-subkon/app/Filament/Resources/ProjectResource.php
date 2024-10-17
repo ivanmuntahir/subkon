@@ -52,6 +52,7 @@ class ProjectResource extends Resource
                     ->required()
                     ->numeric(),
                 Forms\Components\Select::make('certificates_skills')
+                    ->multiple()
                     ->options([
                         'welder' => 'Welder',
                         'helper' => 'Helper',

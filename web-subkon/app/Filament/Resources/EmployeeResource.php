@@ -58,9 +58,13 @@ class EmployeeResource extends Resource implements HasShieldPermissions
                     ->maxLength(255),
                 Forms\Components\DatePicker::make('date_of_birth')
                     ->required(),
-                Forms\Components\TextInput::make('speciality')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Select::make('speciality')
+                    // ->multiple()
+                    ->options([
+                        'welder' => 'Welder',
+                        'helper' => 'Helper',
+                        'multi' => 'Multi Role',
+                    ]),
                 Forms\Components\FileUpload::make('attachment_ktp')
                     // ->required()
             ]);
