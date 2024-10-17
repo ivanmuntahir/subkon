@@ -61,9 +61,8 @@ class EmployeeResource extends Resource implements HasShieldPermissions
                 Forms\Components\TextInput::make('speciality')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('attachment_ktp')
+                Forms\Components\FileUpload::make('attachment_ktp')
                     // ->required()
-                    ->maxLength(255),
             ]);
     }
 
@@ -87,8 +86,8 @@ class EmployeeResource extends Resource implements HasShieldPermissions
                     ->sortable(),
                 Tables\Columns\TextColumn::make('speciality')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('attachment_ktp')
-                    ->searchable(),
+                Tables\Columns\ImageColumn::make('attachment_ktp')
+                    ->square(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

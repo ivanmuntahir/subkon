@@ -28,8 +28,7 @@ class UserResource extends Resource implements HasShieldPermissions
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
+                Forms\Components\TextInput::make('username')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('roles')
@@ -53,7 +52,7 @@ class UserResource extends Resource implements HasShieldPermissions
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
+                Tables\Columns\TextColumn::make('username')
                     ->searchable(),
                  Tables\Columns\TextColumn::make('roles.name')
                     ->searchable(),
