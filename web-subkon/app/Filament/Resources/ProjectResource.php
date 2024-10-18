@@ -70,14 +70,21 @@ class ProjectResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query){
-                $userId = Auth::user()->id;
-                $query->where('subkon_id', $userId);
+            ->modifyQueryUsing(function (Builder $query) {
+                $userSubkonId = Auth::user()->subkon_id ?? null;
+
+                if ($userSubkonId) {
+                    $query->where('subkon_id', $userSubkonId);
+                } else {
+                    // Handle cases where the user does not have a subkon_id
+                    $query->whereNull('subkon_id'); 
+                }
             })
             ->columns([
-                Tables\Columns\TextColumn::make('subkon_id')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('subkon.name')
+                    ->label('Subkon Name') // Optional: Set a custom label
+                    ->sortable()           // Enable sorting by subkon name
+                    ->searchable(),        // Optional: Make the column searchable
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('pic_name')

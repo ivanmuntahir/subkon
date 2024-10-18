@@ -47,7 +47,22 @@ class UserResource extends Resource implements HasShieldPermissions
                     ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                     ->dehydrated(fn ($state) => filled($state))
                     ->required(fn (string $context): bool => $context === 'create'),
+                Forms\Components\Select::make('subkon_id')
+                    ->label('Subkon')
+                    ->relationship('subkon', 'name')  // Refers to the 'subkon' relationship in Employee model
+                    ->required()
+                    ->preload()
+                    ->searchable()
+                    ->getSearchResultsUsing(fn (string $query) => 
+                        \App\Models\Subkon::where('name', 'like', "%{$query}%")
+                            ->orWhere('kode_subkon', 'like', "%{$query}%")
+                            ->get()
+                            ->mapWithKeys(fn ($subkon) => [
+                                $subkon->id => "{$subkon->kode_subkon} - {$subkon->name}"
+                            ])
+                    )
             ]);
+                
     }
 
     public static function table(Table $table): Table
