@@ -13,3 +13,4 @@ How to Setup Properly
 13. run php artisan key:generate to generate key for your app local
 14. run php artisan serve to open in localhost
 15. run php artisan make:policy YourModelName --model=YourModelName to add filament policy access
+16. run php artisan storage:link to create mirroring Public folder for upload docs function
