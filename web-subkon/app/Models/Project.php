@@ -10,13 +10,17 @@ class Project extends Model
     use HasFactory;
     protected $fillable = [
         'subkon_id',
-        'nik',
         'name',
-        'address',
-        'phone_number',
-        'date_of_birth',
-        'speciality',
-        'attachment_ktp'
+        'pic_name',
+        'certificates_skills',
+        'comment',
+        'total_needed',
+        'attachment_bast',
+        'attachment_photo',
+    ];
+
+    protected $casts = [
+        'certificates_skills' => 'array',
     ];
 
     public function subkon()

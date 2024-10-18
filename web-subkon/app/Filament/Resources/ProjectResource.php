@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectResource extends Resource
 {
@@ -43,6 +44,7 @@ class ProjectResource extends Resource
                         . optional(\App\Models\Subkon::find($value))->name
                 ),
                 Forms\Components\TextInput::make('name')
+                    ->label('Nama Proyek')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('pic_name')
@@ -61,13 +63,17 @@ class ProjectResource extends Resource
                 Forms\Components\Textarea::make('comment')
                     ->columnSpanFull(),
                 Forms\Components\FileUpload::make('attachment_bast'),
-                Forms\Components\FileUpload::make('attachment_photo'),
+                Forms\Components\FileUpload::make('attachment_photo')
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query){
+                $userId = Auth::user()->id;
+                $query->where('subkon_id', $userId);
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('subkon_id')
                     ->numeric()
@@ -81,10 +87,10 @@ class ProjectResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('certificates_skills')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('attachment_bast')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('attachment_photo')
-                    ->searchable(),
+                Tables\Columns\ImageColumn::make('attachment_bast')
+                    ->square(),
+                Tables\Columns\ImageColumn::make('attachment_photo')
+                    ->square(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -74,10 +74,12 @@ class EmployeeResource extends Resource implements HasShieldPermissions
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('subkon_id')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('subkon.name')
+                    ->label('Subkon Name')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('nik')
+                    ->label('NIK')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
