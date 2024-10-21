@@ -19,6 +19,11 @@ use Illuminate\Support\Arr;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use BezhanSalleh\FilamentShield\Traits\HasRoles;
+use Filament\Actions\ViewAction;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction as ActionsViewAction;
 
 class ProjectResource extends Resource
 {
@@ -29,7 +34,6 @@ class ProjectResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            
             ->schema([
                Forms\Components\Select::make('subkon_id')
                     ->label('Select Subkon')
@@ -118,26 +122,10 @@ class ProjectResource extends Resource
                                 'welder' => 'Welder',
                                 'helper' => 'Helper',
                             ])
-                            ->required(),
+                            ->required()
+                            ->columns(3),
                     ])
                     ->visible(fn($get) => $get('total_needed') > 0),
-            //   Forms\Components\Repeater::make('certificates_skills')
-            //         ->label('Certificates / Skills')
-            //         ->schema([
-            //             Forms\Components\Select::make('skill') // Change the key to 'skill'
-            //                 ->label('Skill')
-            //                 ->options([
-            //                     'koordinator' => 'Koordinator',
-            //                     'semi' => 'Semi',
-            //                     'welder' => 'Welder',
-            //                     'helper' => 'Helper',
-            //                 ])
-            //                 ->required(), // Ensure at least one skill is selected
-            //         ])
-            //         ->columns(3)
-            //         ->minItems(1)
-            //         ->visible(fn($get) => $get('total_needed') > 0),
-                    
                 Forms\Components\Textarea::make('comment')
                     ->columnSpanFull(),
                 Forms\Components\FileUpload::make('attachment_bast'),
@@ -145,14 +133,6 @@ class ProjectResource extends Resource
                     
             ]);
     }
-
-    // public static function pages(): array
-    // {
-    //     return [
-    //         'create' => Pages\CreateProject::route('/create'),
-    //         'edit' => Pages\EditProject::route('/{record}/edit'),
-    //     ];
-    // }
 
     public static function table(Table $table): Table
     {
@@ -234,7 +214,12 @@ class ProjectResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    ActionsViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make()
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
