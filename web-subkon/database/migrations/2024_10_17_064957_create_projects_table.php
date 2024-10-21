@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');  // Name of the project
             $table->string('pic_name');
             $table->integer('total_needed');
-            $table->string('certificates_skills');  // Required certificates/skills for the project
+            $table->json('certificates_skills');  // Required certificates/skills for the project
             $table->longText('comment')->nullable();
             $table->string('attachment_bast');
             $table->string('attachment_photo');

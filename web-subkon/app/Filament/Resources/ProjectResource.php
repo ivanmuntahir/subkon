@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Arr;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use BezhanSalleh\FilamentShield\Traits\HasRoles;
@@ -103,13 +104,13 @@ class ProjectResource extends Resource
                     ->numeric()
                     ->reactive() // Enables dynamic reactivity based on input
                     ->afterStateUpdated(fn ($state, callable $set) => 
-                         $set('skills', array_fill(0, (int) $state, ['certificates_skills' => null])) // Each entry should have the structure to hold the 'certificates_skills'
+                        $set('certificates_skills', array_fill(0, (int) $state, ['skill' => null])) 
                     ),
-
-               Forms\Components\Repeater::make('skills')
+                
+               Forms\Components\Repeater::make('certificates_skills')
                     ->label('Certificates / Skills')
                     ->schema([
-                        Forms\Components\Select::make('certificates_skills') // Renamed to 'skill'
+                        Forms\Components\Select::make('skill')
                             ->label('Skill')
                             ->options([
                                 'koordinator' => 'Koordinator',
@@ -117,12 +118,25 @@ class ProjectResource extends Resource
                                 'welder' => 'Welder',
                                 'helper' => 'Helper',
                             ])
-                            ->required(), // Ensure at least one skill is selected
-                            
+                            ->required(),
                     ])
-                    ->columns(3)
-                    ->minItems(1)
-                    ->visible(fn($get) => $get('total_needed') > 0), // Visible only when total_needed > 0
+                    ->visible(fn($get) => $get('total_needed') > 0),
+            //   Forms\Components\Repeater::make('certificates_skills')
+            //         ->label('Certificates / Skills')
+            //         ->schema([
+            //             Forms\Components\Select::make('skill') // Change the key to 'skill'
+            //                 ->label('Skill')
+            //                 ->options([
+            //                     'koordinator' => 'Koordinator',
+            //                     'semi' => 'Semi',
+            //                     'welder' => 'Welder',
+            //                     'helper' => 'Helper',
+            //                 ])
+            //                 ->required(), // Ensure at least one skill is selected
+            //         ])
+            //         ->columns(3)
+            //         ->minItems(1)
+            //         ->visible(fn($get) => $get('total_needed') > 0),
                     
                 Forms\Components\Textarea::make('comment')
                     ->columnSpanFull(),
@@ -131,6 +145,14 @@ class ProjectResource extends Resource
                     
             ]);
     }
+
+    // public static function pages(): array
+    // {
+    //     return [
+    //         'create' => Pages\CreateProject::route('/create'),
+    //         'edit' => Pages\EditProject::route('/{record}/edit'),
+    //     ];
+    // }
 
     public static function table(Table $table): Table
     {
@@ -169,8 +191,11 @@ class ProjectResource extends Resource
                     $query->whereNull('subkon_id');
                 }
 
-               
+                //  $data = [];
+                // dd ($data['certificates_skills']);
+
             })
+               
             ->columns([
                 Tables\Columns\TextColumn::make('subkon.name')
                     ->label('Subkon Name') // Optional: Set a custom label
@@ -183,8 +208,11 @@ class ProjectResource extends Resource
                 Tables\Columns\TextColumn::make('total_needed')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('certificates_skills')
-                    ->searchable(),
+                // Tables\Columns\TextColumn::make('certificates_skills.skill')
+                //     ->sortable(),
+               Tables\Columns\TextColumn::make('formatted_certificates_skills')
+                    ->label('Certificates / Skills')
+                    ->sortable(),
                 Tables\Columns\ImageColumn::make('attachment_bast')
                     ->square(),
                 Tables\Columns\ImageColumn::make('attachment_photo')
