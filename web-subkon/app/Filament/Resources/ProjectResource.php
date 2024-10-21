@@ -19,6 +19,7 @@ use Illuminate\Support\Arr;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use BezhanSalleh\FilamentShield\Traits\HasRoles;
+use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
@@ -130,7 +131,7 @@ class ProjectResource extends Resource
                     ->columnSpanFull(),
                 Forms\Components\FileUpload::make('attachment_bast'),
                 Forms\Components\FileUpload::make('attachment_photo')
-                    
+                
             ]);
     }
 
@@ -218,8 +219,9 @@ class ProjectResource extends Resource
                 ActionGroup::make([
                     ActionsViewAction::make(),
                     EditAction::make(),
-                    DeleteAction::make()
-                ])
+                    DeleteAction::make(),
+                ]),
+                
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
