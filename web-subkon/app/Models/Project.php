@@ -21,6 +21,11 @@ class Project extends Model
 
     protected $casts = [
         'certificates_skills' => 'array',
+        
+    ];
+
+    protected $attributes = [
+        'certificates_skills' => '[]', // Default to an empty array
     ];
 
     public function subkon()

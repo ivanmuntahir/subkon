@@ -10,9 +10,14 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Employee;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use BezhanSalleh\FilamentShield\Traits\HasRoles;
 
 class ProjectResource extends Resource
 {
@@ -23,26 +28,67 @@ class ProjectResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            
             ->schema([
-                Forms\Components\Select::make('subkon_id')
-                ->label('Subkon')
-                ->relationship('subkon', 'name')  // Refers to the 'subkon' relationship in Employee model
-                ->required()
-                ->preload()
-                ->searchable()
-                ->getSearchResultsUsing(fn (string $query) => 
-                    \App\Models\Subkon::where('name', 'like', "%{$query}%")
-                        ->orWhere('kode_subkon', 'like', "%{$query}%")
+               Forms\Components\Select::make('subkon_id')
+                    ->label('Select Subkon')
+                    ->required()
+                    ->relationship('subkon', 'name', function ($query) {
+                        $user = Auth::user();
+
+                        // Fetch the user's role ID from the model_has_roles table
+                        $roleId = DB::table('model_has_roles')
+                            ->where('model_type', get_class($user))
+                            ->where('model_id', $user->id)
+                            ->value('role_id');
+
+                        // Use caching to get the super_admin role ID
+                        $superAdminRoleId = Cache::remember('super_admin_role_id', now()->addDay(), function () {
+                            return Role::where('name', 'super_admin')->value('id') ?? 0;
+                        });
+
+                        // Check if the user is a super admin
+                        if ($roleId === $superAdminRoleId) {
+                            // If the user is a super admin, bypass filtering
+                            return $query->select('id', 'name', 'kode_subkon'); // Show all subkons
+                        } else {
+                            // If not a super admin, filter by user's subkon_id
+                            return $query->where('id', $user->subkon_id)->select('id', 'name', 'kode_subkon');
+                        }
+                    })
+                    ->preload()
+                    ->searchable()
+                    ->getSearchResultsUsing(fn (string $search) => 
+                        \App\Models\Subkon::where(function ($query) use ($search) {
+                            $query->where('name', 'like', "%{$search}%")
+                                ->orWhere('kode_subkon', 'like', "%{$search}%");
+
+                            // Further restrict for non-admin users
+                            $user = Auth::user();
+                            $roleId = DB::table('model_has_roles')
+                                ->where('model_type', get_class($user))
+                                ->where('model_id', $user->id)
+                                ->value('role_id');
+
+                            $superAdminRoleId = Cache::remember('super_admin_role_id', now()->addDay(), function () {
+                                return Role::where('name', 'super_admin')->value('id') ?? 0;
+                            });
+
+                            if ($roleId !== $superAdminRoleId) {
+                                // Non-super admin users can only see their own subkon
+                                $query->where('id', $user->subkon_id);
+                            }
+                        })
                         ->get()
                         ->mapWithKeys(fn ($subkon) => [
                             $subkon->id => "{$subkon->kode_subkon} - {$subkon->name}"
                         ])
-                )
-                ->getOptionLabelUsing(fn ($value) => 
-                    optional(\App\Models\Subkon::find($value))->kode_subkon
-                        . ' - ' 
-                        . optional(\App\Models\Subkon::find($value))->name
-                ),
+                    )
+                    ->getOptionLabelUsing(fn ($value) => 
+                        optional(\App\Models\Subkon::find($value))->kode_subkon
+                            . ' - ' 
+                            . optional(\App\Models\Subkon::find($value))->name
+                    ),
                 Forms\Components\TextInput::make('name')
                     ->label('Nama Proyek')
                     ->required()
@@ -50,20 +96,39 @@ class ProjectResource extends Resource
                 Forms\Components\TextInput::make('pic_name')
                     ->required()
                     ->maxLength(255),
+                
                 Forms\Components\TextInput::make('total_needed')
+                    ->label('Total Employees Needed')
                     ->required()
-                    ->numeric(),
-                Forms\Components\Select::make('certificates_skills')
-                    ->multiple()
-                    ->options([
-                        'welder' => 'Welder',
-                        'helper' => 'Helper',
-                        'multi' => 'Multi Role',
-                    ]),
+                    ->numeric()
+                    ->reactive() // Enables dynamic reactivity based on input
+                    ->afterStateUpdated(fn ($state, callable $set) => 
+                         $set('skills', array_fill(0, (int) $state, ['certificates_skills' => null])) // Each entry should have the structure to hold the 'certificates_skills'
+                    ),
+
+               Forms\Components\Repeater::make('skills')
+                    ->label('Certificates / Skills')
+                    ->schema([
+                        Forms\Components\Select::make('certificates_skills') // Renamed to 'skill'
+                            ->label('Skill')
+                            ->options([
+                                'koordinator' => 'Koordinator',
+                                'semi' => 'Semi',
+                                'welder' => 'Welder',
+                                'helper' => 'Helper',
+                            ])
+                            ->required(), // Ensure at least one skill is selected
+                            
+                    ])
+                    ->columns(3)
+                    ->minItems(1)
+                    ->visible(fn($get) => $get('total_needed') > 0), // Visible only when total_needed > 0
+                    
                 Forms\Components\Textarea::make('comment')
                     ->columnSpanFull(),
                 Forms\Components\FileUpload::make('attachment_bast'),
                 Forms\Components\FileUpload::make('attachment_photo')
+                    
             ]);
     }
 
@@ -71,14 +136,40 @@ class ProjectResource extends Resource
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                $userSubkonId = Auth::user()->subkon_id ?? null;
+                $user = Auth::user();
+
+                if (!$user) {
+                    // Handle unauthenticated users (optional)
+                    return;
+                }
+
+                // Fetch the user's role ID from the model_has_roles table
+                $roleId = DB::table('model_has_roles')
+                            ->where('model_type', get_class($user))
+                            ->where('model_id', $user->id)
+                            ->value('role_id');
+
+                // Use caching to get the super_admin role ID
+                $superAdminRoleId = Cache::remember('super_admin_role_id', now()->addDay(), function () {
+                    return Role::where('name', 'super_admin')->value('id') ?? 0;
+                });
+
+                // Check if the user is a super admin
+                if ($roleId === $superAdminRoleId) {
+                    // If the user is a super admin, bypass filtering
+                    return;
+                }
+
+                // Apply filter for non-super_admin users
+                $userSubkonId = $user->subkon_id ?? null;
 
                 if ($userSubkonId) {
                     $query->where('subkon_id', $userSubkonId);
                 } else {
-                    // Handle cases where the user does not have a subkon_id
-                    $query->whereNull('subkon_id'); 
+                    $query->whereNull('subkon_id');
                 }
+
+               
             })
             ->columns([
                 Tables\Columns\TextColumn::make('subkon.name')
