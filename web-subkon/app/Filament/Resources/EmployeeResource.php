@@ -30,25 +30,65 @@ class EmployeeResource extends Resource implements HasShieldPermissions
         return $form
             ->schema([
                 // Assuming you have a relationship named 'subkon' in your model
-               Forms\Components\Select::make('subkon_id')
-    ->label('Subkon')
-    ->required()
-    ->preload()
-    ->searchable()
-    ->options(function () {
-        // Get the authenticated user's subkon_id
-        $userSubkonId = Auth::user()->subkon_id;
+              Forms\Components\Select::make('subkon_id')
+                    ->label('Select Subkon')
+                    ->required()
+                    ->relationship('subkon', 'name', function ($query) {
+                        $user = Auth::user();
 
-        // Fetch the subkon related to the user's subkon_id
-        return Subkon::where('id', $userSubkonId)
-            ->get()
-            ->mapWithKeys(fn ($subkon) => [
-                $subkon->id => "{$subkon->kode_subkon} - {$subkon->name}"
-            ]);
-    })
-    ->getOptionLabelUsing(fn ($value) => 
-        optional(Subkon::find($value))->kode_subkon . ' - ' . optional(Subkon::find($value))->name
-    ),
+                        // Fetch the user's role ID from the model_has_roles table
+                        $roleId = DB::table('model_has_roles')
+                            ->where('model_type', get_class($user))
+                            ->where('model_id', $user->id)
+                            ->value('role_id');
+
+                        // Use caching to get the super_admin role ID
+                        $superAdminRoleId = Cache::remember('super_admin_role_id', now()->addDay(), function () {
+                            return Role::where('name', 'super_admin')->value('id') ?? 0;
+                        });
+
+                        // Check if the user is a super admin
+                        if ($roleId === $superAdminRoleId) {
+                            // If the user is a super admin, bypass filtering
+                            return $query->select('id', 'name', 'kode_subkon'); // Show all subkons
+                        } else {
+                            // If not a super admin, filter by user's subkon_id
+                            return $query->where('id', $user->subkon_id)->select('id', 'name', 'kode_subkon');
+                        }
+                    })
+                    ->preload()
+                    ->searchable()
+                    ->getSearchResultsUsing(fn (string $search) => 
+                        \App\Models\Subkon::where(function ($query) use ($search) {
+                            $query->where('name', 'like', "%{$search}%")
+                                ->orWhere('kode_subkon', 'like', "%{$search}%");
+
+                            // Further restrict for non-admin users
+                            $user = Auth::user();
+                            $roleId = DB::table('model_has_roles')
+                                ->where('model_type', get_class($user))
+                                ->where('model_id', $user->id)
+                                ->value('role_id');
+
+                            $superAdminRoleId = Cache::remember('super_admin_role_id', now()->addDay(), function () {
+                                return Role::where('name', 'super_admin')->value('id') ?? 0;
+                            });
+
+                            if ($roleId !== $superAdminRoleId) {
+                                // Non-super admin users can only see their own subkon
+                                $query->where('id', $user->subkon_id);
+                            }
+                        })
+                        ->get()
+                        ->mapWithKeys(fn ($subkon) => [
+                            $subkon->id => "{$subkon->kode_subkon} - {$subkon->name}"
+                        ])
+                    )
+                    ->getOptionLabelUsing(fn ($value) => 
+                        optional(\App\Models\Subkon::find($value))->kode_subkon
+                            . ' - ' 
+                            . optional(\App\Models\Subkon::find($value))->name
+                    ),
                 Forms\Components\TextInput::make('nik')
                     ->required()
                     ->maxLength(255),

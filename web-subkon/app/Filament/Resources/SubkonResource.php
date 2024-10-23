@@ -57,6 +57,9 @@ class SubkonResource extends Resource implements HasShieldPermissions
                 Tables\Columns\TextColumn::make('total_employee')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('pic_phone_number')
+                    ->label('PIC Kontak')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -107,14 +110,14 @@ class SubkonResource extends Resource implements HasShieldPermissions
         if ($lastSubkon) {
             // Extract the numeric part and increment it
             $lastNumber = (int) substr($lastSubkon->kode_subkon, 4);  // Extract '005'
-            $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);  // Increment and pad to 3 digits
+            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);  // Increment and pad to 3 digits
         } else {
             // If no record exists, start with '001'
-            $newNumber = '001';
+            $newNumber = '0001';
         }
 
         // Return the new kode_subkon, e.g., 'SUB-006'
-        return "SUB-{$newNumber}";
+        return "SUBKON-{$newNumber}";
     }
 
      public static function getPermissionPrefixes(): array

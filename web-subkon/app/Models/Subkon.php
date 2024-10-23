@@ -12,6 +12,8 @@ class Subkon extends Model
         'name',
         'kode_subkon',
         'total_employee',
+        'kota',
+        'provinsi',
     ];
 
     // Auto-generate 'kode_subkon' on model creation
@@ -33,9 +35,9 @@ class Subkon extends Model
             $lastNumber = (int) substr($lastSubkon->kode_subkon, 4);  // Extract '005'
             $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);  // Increment and pad to 3 digits
         } else {
-            $newNumber = '001';  // Start with '001' if no record exists
+            $newNumber = '0001';  // Start with '001' if no record exists
         }
 
-        return "SUB-{$newNumber}";
+        return "SUBKON-{$newNumber}";
     }
 }

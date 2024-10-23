@@ -11,7 +11,9 @@
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.2",
-        "laravel/tinker": "^2.8"
+        "laravel/tinker": "^2.8",
+        "mokhosh/filament-kanban": "^2.9",
+        "spatie/eloquent-sortable": "^4.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

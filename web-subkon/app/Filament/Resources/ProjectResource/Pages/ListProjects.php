@@ -15,10 +15,10 @@ class ListProjects extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
-            Action::make('assign_employees')
-                    ->url('')
-                    ->label('Assign Employee')
-                    ->color('danger')
+            // Action::make('assign_employees')
+            //         ->url('')
+            //         ->label('Assign Employee')
+            //         ->color('danger')
         ];
     }
 }

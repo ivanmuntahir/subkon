@@ -37,7 +37,7 @@ class ProjectResource extends Resource
         return $form
             ->schema([
                Forms\Components\Select::make('subkon_id')
-                    ->label('Select Subkon')
+                    ->label('Pilih Subkon')
                     ->required()
                     ->relationship('subkon', 'name', function ($query) {
                         $user = Auth::user();
@@ -104,7 +104,7 @@ class ProjectResource extends Resource
                     ->maxLength(255),
                 
                 Forms\Components\TextInput::make('total_needed')
-                    ->label('Total Employees Needed')
+                    ->label('Jumlah pekerja yang dibutuhkan')
                     ->required()
                     ->numeric()
                     ->reactive() // Enables dynamic reactivity based on input
@@ -179,14 +179,18 @@ class ProjectResource extends Resource
                
             ->columns([
                 Tables\Columns\TextColumn::make('subkon.name')
-                    ->label('Subkon Name') // Optional: Set a custom label
+                    ->label('Nama Subkon') // Optional: Set a custom label
                     ->sortable()           // Enable sorting by subkon name
                     ->searchable(),        // Optional: Make the column searchable
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nama Proyek')
+                    ->sortable() 
                     ->searchable(),
                 Tables\Columns\TextColumn::make('pic_name')
+                    ->label('Penanggung jawab')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('total_needed')
+                    ->label('Jumlah pekerja yang dibutuhkan')
                     ->numeric()
                     ->sortable(),
                 // Tables\Columns\TextColumn::make('certificates_skills.skill')
