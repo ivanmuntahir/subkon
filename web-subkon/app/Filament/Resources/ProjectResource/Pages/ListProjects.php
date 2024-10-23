@@ -16,7 +16,7 @@ class ListProjects extends ListRecords
         return [
             Actions\CreateAction::make(),
             Action::make('assign_employees')
-                    ->url('')
+                    ->url(route('assignment'))
                     ->label('Assign Employee')
                     ->color('danger')
         ];

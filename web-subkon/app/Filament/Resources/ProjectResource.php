@@ -245,4 +245,9 @@ class ProjectResource extends Resource
             'edit' => Pages\EditProject::route('/{record}/edit'),
         ];
     }
+    // public static function routes(RouteRegistrar $routeRegistrar): void
+    // {
+    //     $routeRegistrar->get('/drag-drop-assignment', ProjectAssignmentDragDrop::class);
+    // }
+
 }

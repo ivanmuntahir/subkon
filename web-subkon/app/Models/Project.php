@@ -36,4 +36,9 @@ class Project extends Model
     {
         return $this->belongsTo(Subkon::class);
     }
+
+    public function assignments()
+    {
+        return $this->hasMany(ProjectAssignment::class, 'project_id');
+    }
 }

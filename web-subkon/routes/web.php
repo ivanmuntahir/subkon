@@ -1,6 +1,10 @@
 <?php
 
+use App\Livewire\Assignment;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\RouteGroup;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -12,7 +16,13 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::group(['middleware' => 'auth'], function () {
+    Route::get('assignment', Assignment::class)->name('assignment');
+});
+
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+
