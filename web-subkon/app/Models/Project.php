@@ -20,6 +20,8 @@ class Project extends Model
         'attachment_photo',
         'regency_id',
         'province_id',
+        'project_deadline',
+        'pic_phone_number',
     ];
 
     protected $casts = [

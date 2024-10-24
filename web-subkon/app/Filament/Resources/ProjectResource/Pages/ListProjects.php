@@ -14,11 +14,16 @@ class ListProjects extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Buat Proyek Baru'),
             Action::make('assign_employees')
                     ->url(route('assignment'))
                     ->label('Delegasikan Pegawai')
-                    ->color('danger')
+                    ->color('success')
         ];
+    }
+     public function getTitle(): string
+    {
+        return 'List Proyek'; // Custom title for create page
     }
 }

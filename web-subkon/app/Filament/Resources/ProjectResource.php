@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ProjectResource\RelationManagers;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\EditRecord;
 use App\Models\Province;
 use App\Models\Project;
 use Filament\Forms;
@@ -27,13 +29,13 @@ use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction as ActionsViewAction;
+use Illuminate\Support\Facades\Date;
 
 class ProjectResource extends Resource
 {
     protected static ?string $model = Project::class;
 
-    protected static ?string $navigationGroup = 'Proyek';
-    protected static ?string $title = 'List Proyek';
+    protected static ?string $navigationGroup = 'Data Proyek';
 
     protected static ?string $navigationIcon = 'heroicon-s-document-duplicate';
 
@@ -57,9 +59,11 @@ class ProjectResource extends Resource
                         $superAdminRoleId = Cache::remember('super_admin_role_id', now()->addDay(), function () {
                             return Role::where('name', 'super_admin')->value('id') ?? 0;
                         });
-
+                        $purchasingRoleId = Cache::remember('purchasing_role_id', now()->addDay(), function () {
+                            return Role::where('name', 'purchasing')->value('id') ?? 0;
+                        });
                         // Check if the user is a super admin
-                        if ($roleId === $superAdminRoleId) {
+                        if ($roleId === $superAdminRoleId || $roleId === $purchasingRoleId) {
                             // If the user is a super admin, bypass filtering
                             return $query->select('id', 'name', 'kode_subkon'); // Show all subkons
                         } else {
@@ -105,16 +109,24 @@ class ProjectResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('pic_name')
+                    ->label('Koordinator')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('pic_phone_number')
+                    ->label('Kontak Koordinator')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\DatePicker::make('project_deadline'),
                 Forms\Components\Select::make('province_id')
                     ->label('Provinsi')
+                    ->placeholder('Pilih Provinsi')
                     ->options(Province::all()->pluck('name', 'id')) // Load all provinces
                     ->searchable() // Searchable dropdown
                     ->reactive() // To trigger dynamic loading of regencies
                     ->afterStateUpdated(fn (callable $set) => $set('regency_id', null)), // Reset regency when province changes
                 Forms\Components\Select::make('regency_id')
                     ->label('Kabupaten/Kota')
+                    ->placeholder('Pilih Kabupaten/Kota')
                     ->options(function (callable $get) {
                         $selectedProvince = $get('province_id'); // Get selected province
                         if ($selectedProvince) {
@@ -179,8 +191,12 @@ class ProjectResource extends Resource
                     return Role::where('name', 'super_admin')->value('id') ?? 0;
                 });
 
+                $purchasingRoleId = Cache::remember('purchasing_role_id', now()->addDay(), function () {
+                    return Role::where('name', 'purchasing')->value('id') ?? 0;
+                });
+
                 // Check if the user is a super admin
-                if ($roleId === $superAdminRoleId) {
+                if ($roleId === $superAdminRoleId || $roleId === $purchasingRoleId) {
                     // If the user is a super admin, bypass filtering
                     return;
                 }
@@ -210,12 +226,16 @@ class ProjectResource extends Resource
                 Tables\Columns\TextColumn::make('pic_name')
                     ->label('Nama Koordinator')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('pic_phone_number')
+                    ->label('Kontak Koordinator')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('total_needed')
                     ->label('Jumlah Pekerja yang Diperlukan')
                     ->numeric()
                     ->sortable(),
-                // Tables\Columns\TextColumn::make('certificates_skills.skill')
-                //     ->sortable(),
+                Tables\Columns\TextColumn::make('project_deadline')
+                    ->date('d M Y')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('regency.name')
                     ->label('Kota/Kabupaten')
                     ->searchable(),
@@ -281,11 +301,5 @@ class ProjectResource extends Resource
     //     $routeRegistrar->get('/drag-drop-assignment', ProjectAssignmentDragDrop::class);
     // }
     // Example of searching Province by name and setting the default value
-    protected function getDefaultFormState(): array
-    {
-        $province = Province::where('name', 'JAWA BARAT')->first(); // Filter Province by name
-        return [
-            'province_id' => $province ? $province->id : null, // Set default to 'JAWA BARAT'
-        ];
-    }
+    
 }

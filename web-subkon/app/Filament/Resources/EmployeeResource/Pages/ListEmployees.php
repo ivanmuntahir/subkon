@@ -16,4 +16,9 @@ class ListEmployees extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+     public function getTitle(): string
+    {
+        return 'List Pegawai'; // Custom title for create page
+    }
+
 }

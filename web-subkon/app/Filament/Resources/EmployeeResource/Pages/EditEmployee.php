@@ -16,4 +16,9 @@ class EditEmployee extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+     public function getTitle(): string
+    {
+        return 'Edit Pegawai'; // Custom title for create page
+    }
+
 }

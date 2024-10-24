@@ -9,4 +9,8 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateProject extends CreateRecord
 {
     protected static string $resource = ProjectResource::class;
+     public function getTitle(): string
+    {
+        return 'Buat Proyek'; // Custom title for create page
+    }
 }

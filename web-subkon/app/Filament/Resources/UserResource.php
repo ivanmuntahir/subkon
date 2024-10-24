@@ -19,6 +19,8 @@ class UserResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = User::class;
 
+    protected static ?string $navigationGroup = 'Data Pengguna';
+
     protected static ?string $navigationIcon = 'heroicon-c-user-plus';
 
     public static function form(Form $form): Form
@@ -50,7 +52,6 @@ class UserResource extends Resource implements HasShieldPermissions
                 Forms\Components\Select::make('subkon_id')
                     ->label('Subkon')
                     ->relationship('subkon', 'name')  // Refers to the 'subkon' relationship in Employee model
-                    ->required()
                     ->preload()
                     ->searchable()
                     ->getSearchResultsUsing(fn (string $query) => 

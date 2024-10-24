@@ -18,6 +18,8 @@ class SubkonResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Subkon::class;
 
+    protected static ?string $navigationGroup = 'Data Subkon';
+
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
 
     public static function form(Form $form): Form

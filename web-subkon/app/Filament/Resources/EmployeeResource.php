@@ -31,24 +31,24 @@ class EmployeeResource extends Resource implements HasShieldPermissions
             ->schema([
                 // Assuming you have a relationship named 'subkon' in your model
                Forms\Components\Select::make('subkon_id')
-    ->label('Subkon')
-    ->required()
-    ->preload()
-    ->searchable()
-    ->options(function () {
-        // Get the authenticated user's subkon_id
-        $userSubkonId = Auth::user()->subkon_id;
+                ->label('Subkon')
+                ->required()
+                ->preload()
+                ->searchable()
+                ->options(function () {
+                    // Get the authenticated user's subkon_id
+                    $userSubkonId = Auth::user()->subkon_id;
 
-        // Fetch the subkon related to the user's subkon_id
-        return Subkon::where('id', $userSubkonId)
-            ->get()
-            ->mapWithKeys(fn ($subkon) => [
-                $subkon->id => "{$subkon->kode_subkon} - {$subkon->name}"
-            ]);
-    })
-    ->getOptionLabelUsing(fn ($value) => 
-        optional(Subkon::find($value))->kode_subkon . ' - ' . optional(Subkon::find($value))->name
-    ),
+                    // Fetch the subkon related to the user's subkon_id
+                    return Subkon::where('id', $userSubkonId)
+                        ->get()
+                        ->mapWithKeys(fn ($subkon) => [
+                            $subkon->id => "{$subkon->kode_subkon} - {$subkon->name}"
+                        ]);
+                })
+                ->getOptionLabelUsing(fn ($value) => 
+                    optional(Subkon::find($value))->kode_subkon . ' - ' . optional(Subkon::find($value))->name
+                ),
                 Forms\Components\TextInput::make('nik')
                     ->required()
                     ->maxLength(255),
