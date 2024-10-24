@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('project_assignments', function (Blueprint $table) {
-            $table->dropColumn('subkon_id');
+        Schema::create('provinces', function (Blueprint $table) {
+            $table->char('id', 2)->index();
+            $table->string('name');
         });
     }
 
@@ -21,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('project_assignments', function (Blueprint $table) {
-            $table->foreignId('subkon_id')->constrained()->onDelete('cascade');
-        });
+        Schema::dropIfExists('provinces');
     }
 };

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ProjectResource\RelationManagers;
+use App\Models\Province;
 use App\Models\Project;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Arr;
 use App\Models\Employee;
+use App\Models\Regency;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use BezhanSalleh\FilamentShield\Traits\HasRoles;
 use Filament\Actions\Action;
@@ -30,6 +32,9 @@ class ProjectResource extends Resource
 {
     protected static ?string $model = Project::class;
 
+    protected static ?string $navigationGroup = 'Proyek';
+    protected static ?string $title = 'List Proyek';
+
     protected static ?string $navigationIcon = 'heroicon-s-document-duplicate';
 
     public static function form(Form $form): Form
@@ -37,7 +42,7 @@ class ProjectResource extends Resource
         return $form
             ->schema([
                Forms\Components\Select::make('subkon_id')
-                    ->label('Select Subkon')
+                    ->label('Pilih Subkon')
                     ->required()
                     ->relationship('subkon', 'name', function ($query) {
                         $user = Auth::user();
@@ -102,9 +107,26 @@ class ProjectResource extends Resource
                 Forms\Components\TextInput::make('pic_name')
                     ->required()
                     ->maxLength(255),
-                
+                Forms\Components\Select::make('province_id')
+                    ->label('Provinsi')
+                    ->options(Province::all()->pluck('name', 'id')) // Load all provinces
+                    ->searchable() // Searchable dropdown
+                    ->reactive() // To trigger dynamic loading of regencies
+                    ->afterStateUpdated(fn (callable $set) => $set('regency_id', null)), // Reset regency when province changes
+                Forms\Components\Select::make('regency_id')
+                    ->label('Kabupaten/Kota')
+                    ->options(function (callable $get) {
+                        $selectedProvince = $get('province_id'); // Get selected province
+                        if ($selectedProvince) {
+                            // Load regencies for the selected province
+                            return Regency::where('province_id', $selectedProvince)->pluck('name', 'id');
+                        }
+                        return Regency::all()->pluck('name', 'id'); // Fallback if no province selected
+                    })
+                    ->searchable() // Searchable dropdown
+                    ->reactive(), // To trigger dynamic loading based on province selection
                 Forms\Components\TextInput::make('total_needed')
-                    ->label('Total Employees Needed')
+                    ->label('Jumlah Pekerja yang Diperlukan')
                     ->required()
                     ->numeric()
                     ->reactive() // Enables dynamic reactivity based on input
@@ -113,7 +135,7 @@ class ProjectResource extends Resource
                     ),
                 
                Forms\Components\Repeater::make('certificates_skills')
-                    ->label('Certificates / Skills')
+                    ->label('Sertifikat Keahlian')
                     ->schema([
                         Forms\Components\Select::make('skill')
                             ->label('Skill')
@@ -179,20 +201,29 @@ class ProjectResource extends Resource
                
             ->columns([
                 Tables\Columns\TextColumn::make('subkon.name')
-                    ->label('Subkon Name') // Optional: Set a custom label
+                    ->label('Nama Subkon') // Optional: Set a custom label
                     ->sortable()           // Enable sorting by subkon name
                     ->searchable(),        // Optional: Make the column searchable
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nama Proyek')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('pic_name')
+                    ->label('Nama Koordinator')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('total_needed')
+                    ->label('Jumlah Pekerja yang Diperlukan')
                     ->numeric()
                     ->sortable(),
                 // Tables\Columns\TextColumn::make('certificates_skills.skill')
                 //     ->sortable(),
+                Tables\Columns\TextColumn::make('regency.name')
+                    ->label('Kota/Kabupaten')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('province.name')
+                    ->label('Provinsi')
+                    ->searchable(),
                Tables\Columns\TextColumn::make('formatted_certificates_skills')
-                    ->label('Certificates / Skills')
+                    ->label('Sertifikat Keahlian')
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('attachment_bast')
                     ->square(),
@@ -249,5 +280,12 @@ class ProjectResource extends Resource
     // {
     //     $routeRegistrar->get('/drag-drop-assignment', ProjectAssignmentDragDrop::class);
     // }
-
+    // Example of searching Province by name and setting the default value
+    protected function getDefaultFormState(): array
+    {
+        $province = Province::where('name', 'JAWA BARAT')->first(); // Filter Province by name
+        return [
+            'province_id' => $province ? $province->id : null, // Set default to 'JAWA BARAT'
+        ];
+    }
 }

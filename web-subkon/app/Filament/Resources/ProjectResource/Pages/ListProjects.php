@@ -17,7 +17,7 @@ class ListProjects extends ListRecords
             Actions\CreateAction::make(),
             Action::make('assign_employees')
                     ->url(route('assignment'))
-                    ->label('Assign Employee')
+                    ->label('Delegasikan Pegawai')
                     ->color('danger')
         ];
     }

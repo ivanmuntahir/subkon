@@ -18,6 +18,8 @@ class Project extends Model
         'total_needed',
         'attachment_bast',
         'attachment_photo',
+        'regency_id',
+        'province_id',
     ];
 
     protected $casts = [
@@ -35,6 +37,16 @@ class Project extends Model
     public function subkon()
     {
         return $this->belongsTo(Subkon::class);
+    }
+
+   public function province()
+    {
+        return $this->belongsTo(Province::class, 'province_id');
+    }
+
+    public function regency()
+    {
+        return $this->belongsTo(Regency::class, 'regency_id');
     }
 
     public function assignments()
