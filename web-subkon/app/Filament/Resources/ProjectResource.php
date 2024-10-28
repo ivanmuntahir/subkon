@@ -114,8 +114,7 @@ class ProjectResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('pic_phone_number')
                     ->label('Kontak Koordinator')
-                    ->required()
-                    ->maxLength(255),
+                    ->required(),
                 Forms\Components\DatePicker::make('project_deadline'),
                 Forms\Components\Select::make('province_id')
                     ->label('Provinsi')

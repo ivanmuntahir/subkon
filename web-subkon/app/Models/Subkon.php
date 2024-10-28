@@ -26,16 +26,20 @@ class Subkon extends Model
 
     public static function generateKodeSubkon(): string
     {
-        // Get the last kode_subkon (e.g., 'SUB-005')
-        $lastSubkon = self::orderBy('id', 'desc')->first();
+        // Retrieve the highest numeric part from all kode_subkon records (e.g., 'SUBKON-0005')
+        $maxSubkon = \App\Models\Subkon::selectRaw("MAX(CAST(SUBSTRING(kode_subkon, 8) AS UNSIGNED)) as max_number")
+                        ->where('kode_subkon', 'LIKE', 'SUBKON-%')
+                        ->first();
 
-        if ($lastSubkon) {
-            $lastNumber = (int) substr($lastSubkon->kode_subkon, 4);  // Extract '005'
-            $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);  // Increment and pad to 3 digits
+        if ($maxSubkon && $maxSubkon->max_number) {
+            // Increment the highest number found and pad to 4 digits
+            $newNumber = str_pad($maxSubkon->max_number + 1, 4, '0', STR_PAD_LEFT);
         } else {
-            $newNumber = '001';  // Start with '001' if no record exists
+            // Start from '0001' if no records exist
+            $newNumber = '0001';
         }
 
-        return "SUB-{$newNumber}";
+        return "SUBKON-{$newNumber}";
     }
+
 }

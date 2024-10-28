@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Assignment;
+use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\RouteGroup;
@@ -19,6 +20,14 @@ use Illuminate\Routing\RouteGroup;
 Route::group(['middleware' => 'auth'], function () {
     Route::get('assignment', Assignment::class)->name('assignment');
 });
+
+Route::get('/login', function () { 
+    return redirect('sandana/login'); 
+})->name('login');
+
+Route::get('/projects', function () { 
+    return redirect('sandana/projects'); 
+})->name('projects');
 
 
 Route::get('/', function () {

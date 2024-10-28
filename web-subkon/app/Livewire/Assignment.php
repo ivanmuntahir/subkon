@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\Employee;
 use App\Models\ProjectAssignment;
 use Illuminate\Support\Facades\Auth;
+use App\Filament\Resources\ProjectResource\Pages\ListProjects;
 
 class Assignment extends Component
 {
@@ -16,79 +17,79 @@ class Assignment extends Component
 
     public function mount()
     {
-        // Load projects with assignments and employees
-        $this->projects = Project::where('subkon_id', Auth::user()->subkon_id)->get();
-        $this->employees = Employee::where('subkon_id', Auth::user()->subkon_id)->get();
+        $subkonId = Auth::user()->subkon_id;
+        $this->projects = Project::where('subkon_id', $subkonId)->get();
+        $this->employees = Employee::where('subkon_id', $subkonId)->get();
     }
 
     public function selectEmployee($projectId, $employeeId)
     {
-        // Check if employee is already selected for the project
+        // Toggle employee selection for the project
         if (isset($this->selectedEmployees[$projectId]) && in_array($employeeId, $this->selectedEmployees[$projectId])) {
-            // Deselect employee
             $this->selectedEmployees[$projectId] = array_diff($this->selectedEmployees[$projectId], [$employeeId]);
         } else {
-            // Add employee to the selected list
             $this->selectedEmployees[$projectId][] = $employeeId;
         }
     }
 
-    // public function assignEmployee($projectId, $employeeId)
-    //     {
-    //         // Fetch the employee to check their current status
-    //         $employee = Employee::find($employeeId);
-
-    //         // Check if the employee exists and their current status
-    //         if ($employee && $employee->status === 'available') {
-    //             // Create the Project Assignment
-    //             ProjectAssignment::create([
-    //                 'project_id' => $projectId,
-    //                 'employee_id' => $employeeId,
-    //                 'status' => 'assigned',
-    //             ]);
-
-    //             // Update the employee's status to 'assigned'
-    //             $employee->update(['status' => 'assigned']);
-
-    //             // Refresh projects data
-    //             $this->projects = Project::with('assignments.employee')->get();
-
-    //             // Optionally flash a success message
-    //             session()->flash('message', 'Employee assigned successfully!');
-    //             return redirect()->route('filament.resources.projects');
-    //         } else {
-    //             // Handle the case where the employee is not available
-    //             session()->flash('error', 'Employee is not available for assignment.');
-    //         }
-    //     }
-    public function assignEmployees($projectId)
-{
-    // Loop through the selected employees for the given project
-    foreach ($this->selectedEmployees[$projectId] as $employeeId) {
-        // Fetch the employee by ID
+    public function assignEmployee($projectId, $employeeId)
+    {
+        // Assign a single employee to a project if available
         $employee = Employee::find($employeeId);
 
-        // Check if the employee exists and their status is 'available'
         if ($employee && $employee->status === 'available') {
-            // Create the Project Assignment
-            ProjectAssignment::create([
-                'project_id' => $projectId,
-                'employee_id' => $employeeId,
-                'status' => 'assigned',
-            ]);
-
-            // Update the employee's status to 'assigned'
-            $employee->update(['status' => 'assigned']);
+            $this->createProjectAssignment($projectId, $employee);
+            session()->flash('message', 'Employee assigned successfully!');
+            return redirect()->route('sandana/projects');
         }
+
+        session()->flash('error', 'Employee is not available for assignment.');
     }
 
-    // Optionally, you can refresh the project assignments or other necessary data
-    $this->projects = Project::with('assignments.employee')->get();
-}
+    public function assignEmployees($projectId)
+    {
+        // Assign all selected employees to a project
+        if (!isset($this->selectedEmployees[$projectId])) {
+            session()->flash('error', 'No employees selected for assignment.');
+            return;
+        }
 
+        foreach ($this->selectedEmployees[$projectId] as $employeeId) {
+            $employee = Employee::find($employeeId);
+
+            if ($employee && $employee->status === 'available') {
+                $this->createProjectAssignment($projectId, $employee);
+            }
+        }
+
+        $this->refreshProjects();
+        session()->flash('message', 'Selected employees assigned successfully!');
+    }
+
+    protected function createProjectAssignment($projectId, $employee)
+    {
+        ProjectAssignment::create([
+            'project_id' => $projectId,
+            'employee_id' => $employee->id,
+            'status' => 'assigned',
+        ]);
+
+        $employee->update(['status' => 'assigned']);
+    }
+
+    protected function refreshProjects()
+    {
+        $this->projects = Project::with('assignments.employee')->get();
+    }
+
+    public function store()
+    {
+        return redirect()->route('sandana/projects');
+    }
 
     public function render()
     {
         return view('livewire.assignment');
     }
 }
+

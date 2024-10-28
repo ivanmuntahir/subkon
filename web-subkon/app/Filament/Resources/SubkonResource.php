@@ -40,7 +40,7 @@ class SubkonResource extends Resource implements HasShieldPermissions
                     ->required()
                     ->maxLength(255)
                     ->disabled()  // Prevent manual edits
-                    ->hint('Automatically generated as SUB-001, SUB-002, etc.'),
+                    ->hint('Automatically generated as SUB-0001, SUB-0002, etc.'),
 
                 Forms\Components\TextInput::make('total_employee')
                     ->required()
@@ -103,20 +103,20 @@ class SubkonResource extends Resource implements HasShieldPermissions
 
     public static function generateKodeSubkon(): string
     {
-        // Get the last kode_subkon from the database (e.g., 'SUB-005')
-        $lastSubkon = \App\Models\Subkon::orderBy('id', 'desc')->first();
+        // Retrieve the highest numeric part from all kode_subkon records (e.g., 'SUBKON-0005')
+        $maxSubkon = \App\Models\Subkon::selectRaw("MAX(CAST(SUBSTRING(kode_subkon, 8) AS UNSIGNED)) as max_number")
+                        ->where('kode_subkon', 'LIKE', 'SUBKON-%')
+                        ->first();
 
-        if ($lastSubkon) {
-            // Extract the numeric part and increment it
-            $lastNumber = (int) substr($lastSubkon->kode_subkon, 4);  // Extract '005'
-            $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);  // Increment and pad to 3 digits
+        if ($maxSubkon && $maxSubkon->max_number) {
+            // Increment the highest number found and pad to 4 digits
+            $newNumber = str_pad($maxSubkon->max_number + 1, 4, '0', STR_PAD_LEFT);
         } else {
-            // If no record exists, start with '001'
-            $newNumber = '001';
+            // Start from '0001' if no records exist
+            $newNumber = '0001';
         }
 
-        // Return the new kode_subkon, e.g., 'SUB-006'
-        return "SUB-{$newNumber}";
+        return "SUBKON-{$newNumber}";
     }
 
      public static function getPermissionPrefixes(): array
