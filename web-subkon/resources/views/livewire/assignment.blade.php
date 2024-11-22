@@ -10,7 +10,7 @@
   <div class="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
       <button type="button" class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
         <span class="sr-only">Open user menu</span>
-        <img class="w-8 h-8 rounded-full" src="/docs/images/people/profile-picture-3.jpg" alt="user photo">
+        <img class="w-8 h-8 rounded-full" src="" alt="user photo">
       </button>
       <!-- Dropdown menu -->
       <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600" id="user-dropdown">
@@ -84,15 +84,21 @@
                                     </button>
                                 @endforeach
                             </div>
-                            <form wire:submit="store" enctype="multipart/form-data">
-                              <!-- Submit Button -->
+                            <!-- <form wire:submit="store" enctype="multipart/form-data">
+                             
                             <button
                                 type="submit"
                                 wire:click="assignEmployees({{ $project->id }})"
                                 class="mt-4 px-4 py-2 bg-green-500 text-white rounded">
+                                Submit Assignments 
+                            </button>
+                            </form> -->
+                            <form action="{{route('sandana.projects')}}" method="get">
+  
+                            <button type="submit" class="mt-4 px-4 py-2 bg-green-500 text-white rounded">
                                 Submit Assignments
                             </button>
-                            </form>
+                        </form>
                             
                         </div>
                     </div>
