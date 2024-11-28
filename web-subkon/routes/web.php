@@ -6,6 +6,7 @@ use App\Filament\Resources\ProjectResource\Pages\ListProjects;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\RouteGroup;
+use App\Http\Controllers\WebcamController;
 
 
 /*
@@ -38,10 +39,14 @@ Route::get('assign-employees', [Assignment::class, 'newbie'])->name('ivan');
 Route::post('project', [Assignment::class, 'assignEmployees'])->name('pegawai');
 
 //mengambil boss
-Route::get('sandana/projects', [ListProjects::class, 'sendBack'])->name('sandana.projects');
+// Route::get('sandana/projects', [ListProjects::class, 'sendBack'])->name('sandana.projects');
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('webcam', [WebcamController::class, 'index']);
+
+Route::post('webcam', [WebcamController::class, 'store'])->name('webcam.capture');
 
 
