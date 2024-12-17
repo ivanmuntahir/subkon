@@ -3,6 +3,7 @@
 use App\Livewire\Assignment;
 use Filament\Pages\Dashboard;
 use App\Filament\Resources\ProjectResource\Pages\ListProjects;
+use App\Http\Controllers\CameraController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\RouteGroup;
@@ -45,8 +46,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('webcam', [WebcamController::class, 'index']);
+// Route::get('webcam', [WebcamController::class, 'index']);
 
-Route::post('webcam', [WebcamController::class, 'store'])->name('webcam.capture');
+// Route::post('webcam', [WebcamController::class, 'store'])->name('webcam.capture');
+
+
+Route::get('/presensi', [CameraController::class, 'index'])->name('presensi');
+Route::get('presensi', [CameraController::class, 'index']);
+Route::post('presensi', [CameraController::class, 'store'])->name('presensi.capture');
+Route::get('photo/{id}', [CameraController::class, 'photo']);
 
 

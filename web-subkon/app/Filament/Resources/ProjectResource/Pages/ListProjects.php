@@ -19,7 +19,11 @@ class ListProjects extends ListRecords
             Action::make('assign_employees')
                     ->url(route('assignment'))
                     ->label('Delegasikan Pegawai')
-                    ->color('success')
+                    ->color('success'),
+            Action::make('presensi')
+                    ->url(url('/presensi')) 
+                    ->label('Presensi')
+                    ->color('primary')
         ];
     }
      public function getTitle(): string

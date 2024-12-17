@@ -26,7 +26,7 @@
 
 <div class="container">
 
-    <h1 class="text-center">Laravel webcam capture image and save from camera - ItSolutionStuff.com</h1>
+    <h1 class="text-center">Presensi Proyek</h1>
 
      
 
